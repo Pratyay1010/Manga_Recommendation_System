@@ -1,4 +1,5 @@
-﻿altair==4.2.2
+render deploy --env PYTHON_VERSION=3.10
+altair==4.2.2
 anyio==3.7.0
 attrs==23.1.0
 blinker==1.6.2
