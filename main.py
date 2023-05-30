@@ -3,7 +3,6 @@ import pandas as pd
 from PIL import Image
 import requests
 from io import BytesIO
-import api
 
 
 st.set_page_config(layout="wide")
@@ -19,39 +18,49 @@ option = st.selectbox(
     'Choice your Manga',
     df)
 
-if st.button('Recommend'):
-    img_list = {}
+url = "http://127.0.0.1:8000/get-manga?name=" + str(option)
 
-    st.header('Recommended Mangas')
-    for name in api.recommend_manga(option):
-        index = df[df['title'] == name].index[0]
-        img_list[name] = manga_img_url['main_picture'][index]
+response = requests.post(url)
 
-    image_width = 200
-    image_height = 300
+if response.status_code == 200:
+    recommend_manga = list(response.json())
 
-    cols = st.columns(5)
+    if st.button('Recommend'):
+        img_list = {}
 
-    num_images = 10
+        st.header('Recommended Mangas')
+        for name in recommend_manga:
+            index = df[df['title'] == name].index[0]
+            img_list[name] = manga_img_url['main_picture'][index]
 
-    for i, (name, url) in enumerate(img_list.items()):
-        # Check if the image URL exists
-        response = requests.get(url)
-        if response.status_code == 200:
-            # Display the image
-            image = Image.open(BytesIO(response.content))
-            with cols[i % 5]:
-                st.image(image, width=image_width)
-                st.write(name)
-        else:
-            # Display a white image
-            white_image = Image.new('RGB', (image_width, image_height), (255, 255, 255))
-            with cols[i % 5]:
-                st.image(white_image, width=image_width)
-                st.write(name)
+        image_width = 200
+        image_height = 300
 
-        # Break the loop if the desired number of images is reached
-        if i + 1 == num_images:
-            break
+        cols = st.columns(5)
 
-    img_list = {}
+        num_images = 10
+
+        for i, (name, url) in enumerate(img_list.items()):
+            # Check if the image URL exists
+            response = requests.get(url)
+            if response.status_code == 200:
+                # Display the image
+                image = Image.open(BytesIO(response.content))
+                with cols[i % 5]:
+                    st.image(image, width=image_width)
+                    st.write(name)
+            else:
+                # Display a white image
+                white_image = Image.new('RGB', (image_width, image_height), (255, 255, 255))
+                with cols[i % 5]:
+                    st.image(white_image, width=image_width)
+                    st.write(name)
+
+            # Break the loop if the desired number of images is reached
+            if i + 1 == num_images:
+                break
+
+        img_list = {}
+
+else:
+    print('Error:', response.status_code)
