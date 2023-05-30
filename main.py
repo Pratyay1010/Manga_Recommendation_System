@@ -18,7 +18,7 @@ option = st.selectbox(
     'Choice your Manga',
     df)
 
-url = "http://127.0.0.1:8000/get-manga?name=" + str(option)
+url = "https://manga-recommendation-system.onrender.com/get-manga?name=" + str(option)
 
 response = requests.post(url)
 
